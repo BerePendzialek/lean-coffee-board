@@ -1,12 +1,30 @@
 const express = require('express')
-
-//instance von express, for backend a server is also an app
+const { v4 } = require('uuid')
 const app = express()
-// unter welchen Port soll das Server gestartet werden
-app.use((req, res) => {
-    console.log(req.method, req.url)
-    res.end('Hello world')
+let users = []
+
+app.use(express.json()) // add middleware for json data
+app.get('/api/users', (req, res) => {
+  res.json(users)
+})
+app.get('/api/users/:id', (req, res) => {
+  const { id } = req.params
+  res.json(users.find(user => user.id === id))
+})
+app.delete('/api/users/:id', (req, res) => {
+  const { id } = req.params
+  const index = users.findIndex(user => user.id === id)
+  users = [...users.slice(0, index), ...users.slice(index + 1)]
+  res.json(users)
+})
+app.post('/api/users', (req, res) => {
+  const newUser = { ...req.body, id: v4() }
+  users.push(newUser)
+  res.json(newUser)
+})
+app.get('/api/cards', (req, res) => {
+  res.json([{ title: 'First card' }])
 })
 app.listen(3000, () => {
-    console.log('Server started at http://localhost:3000')
+  console.log('Server started at http://localhost:3000')
 })
